@@ -19,7 +19,6 @@
 #include <vector>
 
 using namespace sc_core;
-using namespace std;
 
 PowerModelChannel::PowerModelChannel(const sc_module_name name,
                                      const std::string logFilePath,
@@ -41,13 +40,8 @@ PowerModelChannel::PowerModelChannel(const sc_module_name name,
                                    ? "none"
                                    : logFilePath + "/" + std::string(name) +
                                          "_event_power_log.csv"),
-      m_statePowerLogFileName(logFilePath == "none"
-                                   ? "none"
-                                   : logFilePath + "/" + std::string(name) +
-                                         "_state_power_log.csv"),
       m_logTimestep(logTimestep) {
   if (logFilePath != "none") {
-    // cout << "Make directory if it doesn't exist" << std::endl;
     // Make directory if it doesn't exist
     std::string makedir = "mkdir -p " + logFilePath;
     spdlog::info(logFilePath);
@@ -80,15 +74,8 @@ PowerModelChannel::PowerModelChannel(const sc_module_name name,
     std::ofstream fe(m_eventPowerLogFileName, std::ios::out | std::ios::trunc);
     if (!fe.good()) {
       SC_REPORT_FATAL(this->name(),
-                      fmt::format("Can't open eventPowerLog file at {}",
+                      fmt::format("Can't open staticPowerLog file at {}",
                                   m_eventPowerLogFileName)
-                          .c_str());
-    }
-    std::ofstream fsp(m_statePowerLogFileName, std::ios::out | std::ios::trunc);
-    if (!fsp.good()) {
-      SC_REPORT_FATAL(this->name(),
-                      fmt::format("Can't open statePowerLog file at {}",
-                                  m_statePowerLogFileName)
                           .c_str());
     }
   }
@@ -101,13 +88,11 @@ PowerModelChannel::~PowerModelChannel() {
   dumpStateCsv();
   dumpStaticPowerCsv();
   dumpEventPowerCsv();
-  dumpStatePowerCsv();
 }
 
 int PowerModelChannel::registerEvent(
     const std::string moduleName,
     std::shared_ptr<PowerModelEventBase> eventPtr) {
-    // cout << "registerEvent" << std::endl;
   // Check if already running
   if (sc_is_running()) {
     throw std::runtime_error(
@@ -151,7 +136,6 @@ int PowerModelChannel::registerEvent(
 int PowerModelChannel::registerState(
     const std::string moduleName,
     std::shared_ptr<PowerModelStateBase> statePtr) {
-    // cout << "registerState" << std::endl;
   // Check if already running
   if (sc_is_running()) {
     throw std::runtime_error(
@@ -197,7 +181,6 @@ int PowerModelChannel::registerState(
 }
 
 void PowerModelChannel::reportEvent(const unsigned int eventId, const unsigned int n) {
-  // cout << "reportEvent" << std::endl;
   if (!sc_is_running()) {
     throw std::runtime_error(
         "PowerModelEvent::reportEvent events can not be reported before"
@@ -210,7 +193,6 @@ void PowerModelChannel::reportEvent(const unsigned int eventId, const unsigned i
 }
 
 void PowerModelChannel::reportState(const unsigned int stateId) {
-  // cout << "reportState" << std::endl;
   if (!sc_is_running()) {
     throw std::runtime_error(
         "PowerModelState::reportState states can not be reported before"
@@ -248,13 +230,8 @@ double PowerModelChannel::popDynamicEnergy() {
 double PowerModelChannel::getStaticCurrent() {
   // TEST
   // Log current for each module
-  // cout << "Log current for each module" << std::endl;
   m_staticPowerLog.emplace_back(m_stateLog.back().size() + 1, 0.0);
   m_staticPowerLog.back().back() = sc_time_stamp().to_seconds();
-  // TEST
-  m_statePowerLog.emplace_back(m_stateLog.back().size() + 1, 0.0);
-  m_statePowerLog.back().back() = sc_time_stamp().to_seconds();
-
   for (unsigned int i = 0; i < m_stateLog.back().size() - 1; ++i) {
     const auto &stateId = m_stateLog.back()[i];
     m_staticPowerLog.back()[i] =
@@ -262,30 +239,8 @@ double PowerModelChannel::getStaticCurrent() {
             ? m_supplyVoltage *
                   m_states[stateId].state->calculateCurrent(m_supplyVoltage)
             : 0.0;
-
-    // TEST
-    // const double statePower = m_states[i].state->calculateCurrent(m_supplyVoltage) * m_supplyVoltage;
-    // m_statePowerLog.back()[stateId] = statePower;
-    // const double statePower = 0;
-    // m_statePowerLog.back()[stateId] = statePower;
-    m_statePowerLog.back()[i] =
-        stateId >= 0
-            ? m_supplyVoltage *
-                  m_states[stateId].state->calculateCurrent(m_supplyVoltage)
-            : 0.0;
   }
 
-  // Total power per state in column 
-    // for (int i = 0; i < m_states.size(); ++i) {
-    //   m_statePowerLog.back()[m_states.size()] += m_statePowerLog.back()[i];
-    // }
-
-  if (m_statePowerLog.size() > m_logDumpThreshold) {
-    dumpStatePowerCsv();
-    m_statePowerLog.clear();
-  }
-
-  /////
   if (m_staticPowerLog.size() > m_logDumpThreshold) {
     dumpStaticPowerCsv();
     m_staticPowerLog.clear();
@@ -340,11 +295,11 @@ void PowerModelChannel::getDynamicPower() {
     //                           : sum;
     //     });
 }
+//_________________________________________________________________________
 
 
 void PowerModelChannel::start_of_simulation() {
   // Initialize event and state log
-  // cout << "Initialize event and state log" << std::endl;
   m_eventLog.emplace_back(m_events.size() + 1, 0);
 
   // First entry is at t = timestep
@@ -377,11 +332,11 @@ void PowerModelChannel::logLoop() {
     SC_REPORT_INFO(this->name(), "Logging disabled.");
     return;
   }
-  // cout << "before the while loop" << std::endl;
+
   while (1) {
     // Wait for a timestep
     wait(m_logTimestep);
-    // cout << "Copy current state (excluding time stamp)" << std::endl;
+
     // Copy current state (excluding time stamp)
     const auto currentState = std::vector<int>(m_stateLog.back());
     // Dump file when log exceeds threshold
@@ -480,7 +435,6 @@ void PowerModelChannel::dumpStaticPowerCsv() {
         spdlog::info("Statelog: {}", i);
       }
       for (auto &val : res) {
-        // f << val << '\n';
         f << val << (&val == &res.back() ? '\n' : ',');
         val = 0.0;
       }
@@ -533,49 +487,6 @@ void PowerModelChannel::dumpEventPowerCsv() {
     }
   }
 }
-
-//_____________ADDITION2_____________StateDump___________________
-
-void PowerModelChannel::dumpStatePowerCsv() {
-  std::ofstream f(m_statePowerLogFileName, std::ios::out | std::ios::app);
-  if (f.tellp() == 0) {
-    // Header
-    for (const auto &nm : m_states) {
-      f << nm.state->name << ",";
-    }
-    f << "time(s)\n";
-  }
-  // Values
-  // Calculate average
-  auto res = std::vector<double>(m_stateLog.back().size() + 1, 0.0);
-  for (int i = 0; i < m_statePowerLog.size(); ++i) {
-    // Average values
-    for (int j = 0; j < m_statePowerLog[i].size() - 1; ++j) {
-      res[j] += m_statePowerLog[i][j] / m_statePowerAveragingFactor;
-    }
-
-    // Dump
-    if ((i > 0 && (i % m_statePowerAveragingFactor == 0)) ||
-        i == m_statePowerLog.size() - 1) {
-        if(i != 10){
-          spdlog::info("Statelog: {}", i);
-          spdlog::info("First condition: {}", i > 0 && (i % m_statePowerAveragingFactor == 0));
-          spdlog::info("Second condition: {}", i == m_statePowerLog.size() - 1);
-          spdlog::info(m_statePowerLog[i].back());
-        }
-        for (auto &val : res) {
-          f << val << (&val == &res.back() ? '\n' : ',');
-          val = 0.0;
-      }
-    }
-
-    // Time stamp
-    if (i % m_statePowerAveragingFactor == 0) {
-      res.back() = m_statePowerLog[i].back();
-    }
-  }
-}
-
 
 void PowerModelChannel::setSupplyVoltage(const double val) {
   if (m_supplyVoltage != val) {

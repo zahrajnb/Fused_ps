@@ -56,9 +56,7 @@ public:
   virtual double popDynamicEnergy() override;
 
   virtual double getStaticCurrent() override;
-
   virtual void getDynamicPower() override;
-  // virtual void getStatePower() ;
 
   virtual const sc_core::sc_event &supplyVoltageChangedEvent() const override {
     return m_supplyVoltageChangedEvent;
@@ -124,7 +122,6 @@ private:
   std::string m_stateLogFileName;
   std::string m_staticPowerLogFileName;
   std::string m_eventPowerLogFileName;
-  std::string m_statePowerLogFileName;
 
   //! Log file timestep
   sc_core::sc_time m_logTimestep;
@@ -150,7 +147,6 @@ private:
   // i_mod0 i_mod1 ... i_modN TIMEM
   std::vector<std::vector<double>> m_staticPowerLog;
   std::vector<std::vector<double>> m_eventPowerLog;
-  std::vector<std::vector<double>> m_statePowerLog;
 
   //! How many log entries to save in memory before dumping to file
   const int m_logDumpThreshold = 10;
@@ -158,7 +154,6 @@ private:
   //! How many static power log entries to average out
   const int m_staticPowerAveragingFactor = 100;
   const int m_eventPowerAveragingFactor = 100;
-  const int m_statePowerAveragingFactor = 100;
 
   // void getDynamicPower();
   /**
@@ -175,7 +170,6 @@ private:
 
   void dumpEventPowerCsv();
 
-  void dumpStatePowerCsv();
   /**
    * @brief logLoop systemc thread that records event counts at a specified
    * timestep. The event counts for logging are unaffected reset by the
