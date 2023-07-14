@@ -6,23 +6,22 @@
 #
 
 cmake_minimum_required(VERSION 3.12)
-project(Fused_ps VERSION 1.0.0 DESCRIPTION "fused ...")
 
-# option(INSTALL_SYSTEMC "Download, build & install SystemC" OFF)
-# option(INSTALL_DEPENDENCIES "Download, build & install other dependencies only" OFF)
+option(INSTALL_SYSTEMC "Download, build & install SystemC" OFF)
+option(INSTALL_DEPENDENCIES "Download, build & install other dependencies only" OFF)
 
 set(EP_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/imported CACHE STRING
 								"Installation directory for dependencies")
 
-# IF(INSTALL_DEPENDENCIES)
-# 	project(INSTALL_DEPENDENCIES NONE)
-# 	set(CMAKE_CXX_STANDARD 11)
-# 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# 	include(cmake/InstallDependencies.cmake)
-# 	return()
-# ELSE()
-# 	project(fused-ps)
-# ENDIF()
+IF(INSTALL_DEPENDENCIES)
+	project(INSTALL_DEPENDENCIES NONE)
+	set(CMAKE_CXX_STANDARD 11)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+	include(cmake/InstallDependencies.cmake)
+	return()
+ELSE()
+	project(Fused_ps VERSION 1.0.0 DESCRIPTION "fused ...")
+ENDIF()
 
 #set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
