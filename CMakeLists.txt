@@ -6,57 +6,48 @@
 #
 
 cmake_minimum_required(VERSION 3.12)
+project(Fused_ps VERSION 1.0.0 DESCRIPTION "fused ...")
 
-include(cmake/Utilities.cmake)
+# option(INSTALL_SYSTEMC "Download, build & install SystemC" OFF)
+# option(INSTALL_DEPENDENCIES "Download, build & install other dependencies only" OFF)
 
-option(INSTALL_SYSTEMC "Download, build & install SystemC" OFF)
-option(INSTALL_SYSTEMCAMS "Download, build & install SystemC-AMS" OFF)
-option(INSTALL_DEPENDENCIES "Download, build & install other dependencies only" OFF)
-option(ENABLE_TESTS "Build tests" ON)
+set(EP_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/imported CACHE STRING
+								"Installation directory for dependencies")
 
-set(EP_INSTALL_DIR $ENV{HOME}/.local CACHE STRING
-                "Installation directory for dependencies")
+# IF(INSTALL_DEPENDENCIES)
+# 	project(INSTALL_DEPENDENCIES NONE)
+# 	set(CMAKE_CXX_STANDARD 11)
+# 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# 	include(cmake/InstallDependencies.cmake)
+# 	return()
+# ELSE()
+# 	project(fused-ps)
+# ENDIF()
 
-IF(INSTALL_DEPENDENCIES)
-  project(INSTALL_DEPENDENCIES NONE)
-  set(CMAKE_CXX_STANDARD 11)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  include(cmake/InstallDependencies.cmake)
-  return()
-ELSE()
-  project(fused-ps)
-ENDIF()
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+#set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #Enable  sanitizer on debug build
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE}
 #       -march=native -fsanitize=address,undefined,leak")
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}
-  -Wall -Wextra -Wno-reorder -Wno-unused -Wno-sign-compare")
+#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS}
+#	-Wall -Wextra -Wno-reorder -Wno-unused -Wno-sign-compare")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_EXE_LINKER_FLAGS -static)
 
+#LIST(APPEND CMAKE_PREFIX_PATH ${EP_INSTALL_DIR}/lib/cmake/spdlog ${EP_INSTALL_DIR}/lib/cmake/SystemCLanguage ${EP_INSTALL_DIR}/lib/cmake/yaml-cpp)
 LIST(APPEND CMAKE_PREFIX_PATH ${EP_INSTALL_DIR})
+
 find_package(spdlog REQUIRED )
 find_package(yaml-cpp REQUIRED)
+find_package(SystemCLanguage REQUIRED)
 
 include_directories(.)
 link_directories(${EP_INSTALL_DIR}/lib)
 include_directories(${EP_INSTALL_DIR}/include)
 
-add_subdirectory(ps)
-add_subdirectory(examples)
-
-IF(ENABLE_TESTS)
-  enable_testing()
-
-  # Extra command to check outputs of failing tests
-  add_custom_target(testcheck COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
-
-  # ---- "unit-tests" ------
-  add_subdirectory(test)
-  add_test(NAME PowerModelChannel COMMAND testPowerModelChannel)
-ENDIF()
+file (GLOB HEADERS "${CMAKE_CURRENT_LIST_DIR}/ps/*.h")
+file (GLOB SOURCES "${CMAKE_CURRENT_LIST_DIR}/ps/*.cpp")
+add_library(${PROJECT_NAME} ${HEADERS} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} PUBLIC SystemC::systemc spdlog::spdlog)

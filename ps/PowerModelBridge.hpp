@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ps/PowerModelChannelIf.hpp"
+#include "PowerModelChannelIf.hpp"
 
 #include <spdlog/spdlog.h>
 // #include <systemc-ams>

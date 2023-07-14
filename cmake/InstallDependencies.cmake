@@ -21,26 +21,6 @@ if (INSTALL_SYSTEMC)
     )
 endif()
 
-if (INSTALL_SYSTEMCAMS)
-  # SystemC-AMS
-  ExternalProject_Add (ep_systemc_ams
-    DEPENDS ep_systemc
-    GIT_REPOSITORY https://github.com/sivertism/mirror-sysc-ams.git
-    GIT_TAG 2.3
-    GIT_SHALLOW ON
-    GIT_PROGRESS ON
-    CONFIGURE_COMMAND autoreconf
-      COMMAND autoconf configure.ac > configure
-      COMMAND ./configure --prefix=${EP_INSTALL_DIR}
-                                  CXXFLAGS=--std=c++11
-                                  --with-systemc=${EP_INSTALL_DIR}
-                                  --disable-systemc_compile_check
-                                  --with-arch-suffix=
-    BUILD_COMMAND make -j4
-    BUILD_IN_SOURCE 1
-    )
-endif()
-
 # spdlog
 ExternalProject_Add (ep_spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git

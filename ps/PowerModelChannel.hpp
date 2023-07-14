@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include "ps/PowerModelChannelIf.hpp"
-#include "ps/PowerModelEventBase.hpp"
+#include "PowerModelChannelIf.hpp"
+#include "PowerModelEventBase.hpp"
 #include <memory>
 #include <string>
 #include <systemc>

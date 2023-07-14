@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <string>
-#include "ps/PowerModelStateBase.hpp"
+#include "PowerModelStateBase.hpp"
 
 /**
  * Power model state for states that have a constant current consumption

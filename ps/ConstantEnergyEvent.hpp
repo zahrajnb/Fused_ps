@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <string>
-#include "ps/PowerModelEventBase.hpp"
+#include "PowerModelEventBase.hpp"
 
 /**
  * Power model event for events that have a constant energy consumption

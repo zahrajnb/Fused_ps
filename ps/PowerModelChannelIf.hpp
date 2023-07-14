@@ -9,8 +9,8 @@
 
 #include <memory>
 #include <systemc>
-#include "ps/PowerModelEventBase.hpp"
-#include "ps/PowerModelStateBase.hpp"
+#include "PowerModelEventBase.hpp"
+#include "PowerModelStateBase.hpp"
 
 /**
  * Power model channel interfaces
