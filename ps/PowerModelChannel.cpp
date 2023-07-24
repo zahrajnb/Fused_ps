@@ -336,7 +336,6 @@ void PowerModelChannel::logLoop() {
   while (1) {
     // Wait for a timestep
     wait(m_logTimestep);
-
     // Copy current state (excluding time stamp)
     const auto currentState = std::vector<int>(m_stateLog.back());
     // Dump file when log exceeds threshold

@@ -56,6 +56,7 @@ public:
   virtual double popDynamicEnergy() override;
 
   virtual double getStaticCurrent() override;
+
   virtual void getDynamicPower() override;
 
   virtual const sc_core::sc_event &supplyVoltageChangedEvent() const override {
@@ -149,11 +150,11 @@ private:
   std::vector<std::vector<double>> m_eventPowerLog;
 
   //! How many log entries to save in memory before dumping to file
-  const int m_logDumpThreshold = 10;
+  const int m_logDumpThreshold = 2;
 
   //! How many static power log entries to average out
-  const int m_staticPowerAveragingFactor = 100;
-  const int m_eventPowerAveragingFactor = 100;
+  const int m_staticPowerAveragingFactor = 3;
+  const int m_eventPowerAveragingFactor = 3;
 
   // void getDynamicPower();
   /**
